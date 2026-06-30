@@ -17,8 +17,36 @@ export default function TutorApplyPage() {
   const [hourlyRate, setHourlyRate] = useState(1500);
   const [courseInput, setCourseInput] = useState("");
   const [courses, setCourses] = useState<string[]>([]);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [availability, setAvailability] = useState<Record<string, string[]>>({});
+
+  const DAYS = [
+    { value: "mon", label: "Monday" },
+    { value: "tue", label: "Tuesday" },
+    { value: "wed", label: "Wednesday" },
+    { value: "thu", label: "Thursday" },
+    { value: "fri", label: "Friday" },
+    { value: "sat", label: "Saturday" },
+    { value: "sun", label: "Sunday" },
+  ];
+
+  function toggleDay(day: string) {
+    const newAvail = { ...availability };
+    if (newAvail[day]) {
+      delete newAvail[day];
+    } else {
+      newAvail[day] = ["9:00 AM - 5:00 PM"];
+    }
+    setAvailability(newAvail);
+  }
+
+  function updateTimeSlot(day: string, slot: string) {
+    const newAvail = { ...availability };
+    newAvail[day] = [slot];
+    setAvailability(newAvail);
+  }
 
   function addCourse() {
     const code = courseInput.trim().toUpperCase();
@@ -38,6 +66,23 @@ export default function TutorApplyPage() {
     setLoading(true);
 
     try {
+      let avatarUrl = undefined;
+      if (imageFile) {
+        const uploadData = new FormData();
+        uploadData.append("files", imageFile);
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          body: uploadData,
+        });
+        if (!uploadRes.ok) {
+          setError("Failed to upload profile picture");
+          setLoading(false);
+          return;
+        }
+        const uploadJson = await uploadRes.json();
+        avatarUrl = uploadJson.urls[0];
+      }
+
       const res = await fetch("/api/tutors", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -46,7 +91,8 @@ export default function TutorApplyPage() {
           bio,
           hourlyRate,
           expertiseAreas: courses,
-          availability: {},
+          availability,
+          avatarUrl,
         }),
       });
       const data = await res.json();
@@ -76,6 +122,17 @@ export default function TutorApplyPage() {
         <div>
           <Label htmlFor="headline">Headline</Label>
           <Input id="headline" value={headline} onChange={(e) => setHeadline(e.target.value)} required minLength={5} placeholder="MAT201/MAT202 & general calculus tutor" className="mt-1.5" />
+        </div>
+
+        <div>
+          <Label htmlFor="picture">Profile Picture</Label>
+          <Input 
+            id="picture" 
+            type="file" 
+            accept="image/*" 
+            onChange={(e) => setImageFile(e.target.files?.[0] || null)} 
+            className="mt-1.5 cursor-pointer" 
+          />
         </div>
 
         <div>
@@ -117,6 +174,33 @@ export default function TutorApplyPage() {
         <div>
           <Label htmlFor="hourlyRate">Hourly rate (₦)</Label>
           <Input id="hourlyRate" type="number" min={100} step={100} value={hourlyRate} onChange={(e) => setHourlyRate(Number(e.target.value))} required className="mt-1.5" />
+        </div>
+
+        <div>
+          <Label>Availability (Optional)</Label>
+          <div className="mt-2 flex flex-col gap-2">
+            {DAYS.map(day => (
+              <div key={day.value} className="flex items-center gap-3">
+                <label className="flex items-center gap-2 text-sm text-ink w-32 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={!!availability[day.value]}
+                    onChange={() => toggleDay(day.value)}
+                    className="rounded border-warmgray-300 text-violet-600 focus:ring-violet-600 h-4 w-4"
+                  />
+                  {day.label}
+                </label>
+                {availability[day.value] && (
+                  <Input 
+                    value={availability[day.value][0]}
+                    onChange={(e) => updateTimeSlot(day.value, e.target.value)}
+                    placeholder="e.g. 10:00 AM - 2:00 PM"
+                    className="h-8 text-sm flex-1 max-w-[200px]"
+                  />
+                )}
+              </div>
+            ))}
+          </div>
         </div>
 
         {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}

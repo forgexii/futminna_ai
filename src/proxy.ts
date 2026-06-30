@@ -20,7 +20,7 @@ export function proxy(req: NextRequest) {
       "style-src 'self' 'unsafe-inline'",
       "font-src 'self' data:",
       "img-src 'self' data: blob: https:",
-      "connect-src 'self' https://api.paystack.co https://api.anthropic.com",
+      "connect-src 'self' https://api.paystack.co https://openrouter.ai",
       "frame-src 'self' https://checkout.paystack.com",
     ].join("; ")
   );

@@ -70,3 +70,25 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
   const [updated] = await db.update(tutorProfiles).set(allowed).where(eq(tutorProfiles.id, id)).returning();
   return NextResponse.json({ tutor: updated });
 }
+
+export async function DELETE(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
+  const { id } = await ctx.params;
+  const { session, error } = await requireSession();
+  if (error) return NextResponse.json(error.body, { status: error.status });
+
+  const [existing] = await db.select().from(tutorProfiles).where(eq(tutorProfiles.id, id));
+  if (!existing) return NextResponse.json({ error: "Tutor not found" }, { status: 404 });
+  if (existing.userId !== session!.user.id && session!.user.role !== "admin") {
+    return NextResponse.json({ error: "Not authorized" }, { status: 403 });
+  }
+
+  // Delete the tutor profile
+  await db.delete(tutorProfiles).where(eq(tutorProfiles.id, id));
+
+  // Reset the user's role to 'student' if they aren't an admin
+  if (session!.user.role !== "admin") {
+    await db.update(users).set({ role: "student" }).where(eq(users.id, existing.userId));
+  }
+
+  return NextResponse.json({ success: true });
+}

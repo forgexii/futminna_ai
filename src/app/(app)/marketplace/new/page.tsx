@@ -43,13 +43,36 @@ export default function NewListingPage() {
     setLoading(true);
 
     const form = new FormData(e.currentTarget);
+    const imageFiles = form.getAll("images") as File[];
+    const validFiles = imageFiles.filter(f => f.size > 0);
+    let uploadedUrls: string[] = [];
+
+    if (validFiles.length > 0) {
+      const uploadData = new FormData();
+      validFiles.forEach(f => uploadData.append("files", f));
+      
+      const uploadRes = await fetch("/api/upload", {
+        method: "POST",
+        body: uploadData,
+      });
+      
+      if (!uploadRes.ok) {
+        setError("Failed to upload images");
+        setLoading(false);
+        return;
+      }
+      
+      const uploadJson = await uploadRes.json();
+      uploadedUrls = uploadJson.urls;
+    }
+
     const payload = {
       title: String(form.get("title")),
       description: String(form.get("description")),
       price: Number(form.get("price")),
       categoryId,
       condition,
-      images: [],
+      images: uploadedUrls,
       location: String(form.get("location") || "") || undefined,
     };
 
@@ -131,6 +154,11 @@ export default function NewListingPage() {
         <div>
           <Label htmlFor="location">Location (optional)</Label>
           <Input id="location" name="location" placeholder="Gidan Kwano, Hostel B" className="mt-1.5" />
+        </div>
+
+        <div>
+          <Label htmlFor="images">Images</Label>
+          <Input id="images" name="images" type="file" multiple accept="image/*" className="mt-1.5 cursor-pointer" />
         </div>
 
         {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}

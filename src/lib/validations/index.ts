@@ -30,6 +30,7 @@ export const tutorProfileSchema = z.object({
   bio: z.string().min(20).max(1000),
   hourlyRate: z.number().positive(),
   availability: z.record(z.string(), z.array(z.string())).default({}),
+  avatarUrl: z.string().optional(),
 });
 
 export const bookingSchema = z.object({

@@ -30,7 +30,8 @@ export async function POST(req: NextRequest) {
       email: user.email,
       verificationStatus: user.verificationStatus,
     });
-  } catch {
+  } catch (error) {
+    console.error("Registration error:", error);
     return NextResponse.json({ error: "Something went wrong. Try again." }, { status: 500 });
   }
 }

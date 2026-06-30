@@ -25,6 +25,7 @@ interface ListingDetail {
     favoriteCount: number;
     viewCount: number;
     sellerId: string;
+    images: string | string[];
   };
   seller: { id: string; name: string; verificationStatus: string; department: string | null } | null;
   category: { id: string; name: string } | null;
@@ -128,6 +129,7 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
 
   const { listing, seller, category, sellerRatingAvg, sellerRatingCount, isFavorited } = data;
   const isOwner = session?.user?.id === listing.sellerId;
+  const images: string[] = typeof listing.images === "string" ? JSON.parse(listing.images || "[]") : (listing.images || []);
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
@@ -138,9 +140,23 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
 
       <div className="mt-5 grid gap-8 lg:grid-cols-[1.4fr_1fr]">
         <div>
-          <div className="flex aspect-[16/10] items-center justify-center rounded-[var(--radius-card)] bg-gradient-to-br from-violet-50 to-warmgray-50 text-violet-200">
-            <span className="font-display text-6xl font-semibold">{listing.title.charAt(0)}</span>
-          </div>
+          {images && images.length > 0 ? (
+            <div className="flex aspect-[16/10] items-center justify-center rounded-[var(--radius-card)] overflow-hidden bg-warmgray-50 border border-warmgray-100">
+              <img src={images[0]} alt={listing.title} className="h-full w-full object-cover" />
+            </div>
+          ) : (
+            <div className="flex aspect-[16/10] items-center justify-center rounded-[var(--radius-card)] bg-gradient-to-br from-violet-50 to-warmgray-50 text-violet-200">
+              <span className="font-display text-6xl font-semibold">{listing.title.charAt(0)}</span>
+            </div>
+          )}
+
+          {images && images.length > 1 && (
+            <div className="mt-4 flex gap-2 overflow-x-auto pb-2">
+              {images.map((img, i) => (
+                <img key={i} src={img} alt={`${listing.title} ${i + 1}`} className="h-20 w-20 rounded-md object-cover border border-warmgray-200" />
+              ))}
+            </div>
+          )}
 
           <div className="mt-6 flex flex-wrap items-center gap-2">
             {category && <Badge variant="neutral">{category.name}</Badge>}

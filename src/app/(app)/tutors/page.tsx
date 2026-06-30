@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { PinTab } from "@/components/shared/pin-tab";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface TutorRow {
   tutor: {
@@ -18,7 +19,7 @@ interface TutorRow {
     ratingCount: number;
     totalSessions: number;
   };
-  user: { id: string; name: string; department: string | null } | null;
+  user: { id: string; name: string; department: string | null; avatarUrl?: string | null } | null;
 }
 
 export default function TutorsPage() {
@@ -81,9 +82,10 @@ export default function TutorsPage() {
                   className="relative flex flex-col rounded-[var(--radius-card)] border border-warmgray-100 bg-white p-5 shadow-[var(--shadow-soft)] transition-shadow hover:shadow-[var(--shadow-lift)]"
                 >
                   {i < 2 && <PinTab color={i === 0 ? "violet" : "emerald"} />}
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-100 text-violet-700">
-                    <GraduationCap className="h-5 w-5" />
-                  </div>
+                  <Avatar className="h-11 w-11 rounded-xl">
+                    {row.user?.avatarUrl && <AvatarImage src={row.user.avatarUrl} alt={row.user.name} className="object-cover" />}
+                    <AvatarFallback className="rounded-xl text-violet-700 bg-violet-100"><GraduationCap className="h-5 w-5" /></AvatarFallback>
+                  </Avatar>
                   <p className="mt-3 text-sm font-semibold text-ink">{row.user?.name}</p>
                   <p className="mt-0.5 text-xs text-warmgray-400">{row.user?.department}</p>
                   <p className="mt-2 text-sm leading-snug text-warmgray-600 line-clamp-2">{row.tutor.headline}</p>

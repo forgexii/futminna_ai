@@ -58,11 +58,11 @@ export default function HomePage() {
         <section className="relative overflow-hidden bg-gradient-to-b from-violet-50 via-background to-background">
           <div
             aria-hidden="true"
-            className="absolute -top-24 right-[-10%] h-[420px] w-[420px] rounded-full bg-violet-200/50 blur-3xl"
+            className="pointer-events-none absolute -top-24 right-[-10%] h-[420px] w-[420px] rounded-full bg-violet-200/50 blur-3xl"
           />
           <div
             aria-hidden="true"
-            className="absolute top-40 left-[-10%] h-[320px] w-[320px] rounded-full bg-gold-100/70 blur-3xl"
+            className="pointer-events-none absolute top-40 left-[-10%] h-[320px] w-[320px] rounded-full bg-gold-100/70 blur-3xl"
           />
 
           <div className="relative mx-auto max-w-7xl px-4 pb-16 pt-14 sm:px-6 sm:pb-24 sm:pt-20 lg:px-8">

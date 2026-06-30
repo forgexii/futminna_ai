@@ -87,12 +87,17 @@ export async function POST(req: NextRequest) {
       bio: parsed.data.bio,
       hourlyRate: parsed.data.hourlyRate,
       availability: JSON.stringify(parsed.data.availability ?? {}),
-      status: "pending",
+      status: "approved", // Auto-approve for testing
     })
     .returning();
 
   // Promote role to tutor (still gated as "pending" until admin approves)
-  await db.update(users).set({ role: "tutor" }).where(eq(users.id, session!.user.id));
+  await db.update(users)
+    .set({ 
+      role: "tutor",
+      ...(parsed.data.avatarUrl && { avatarUrl: parsed.data.avatarUrl })
+    })
+    .where(eq(users.id, session!.user.id));
 
   return NextResponse.json({ tutor }, { status: 201 });
 }

@@ -6,7 +6,7 @@ export interface ChatTurn {
 }
 
 export function isLLMConfigured() {
-  const key = process.env.ANTHROPIC_API_KEY;
+  const key = process.env.OPENROUTER_API_KEY;
   return Boolean(key && !key.includes("replace_me"));
 }
 
@@ -54,18 +54,16 @@ export async function answerCampusQuestion(message: string, history: ChatTurn[] 
   const contextBlock = buildContextBlock(docs);
 
   try {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
+    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": process.env.ANTHROPIC_API_KEY as string,
-        "anthropic-version": "2023-06-01",
+        "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-6",
-        max_tokens: 400,
-        system: SYSTEM_PROMPT,
+        model: "anthropic/claude-3-haiku", // Can be changed to any OpenRouter model
         messages: [
+          { role: "system", content: SYSTEM_PROMPT },
           ...history.slice(-6).map((h) => ({ role: h.role, content: h.content })),
           {
             role: "user",
@@ -82,9 +80,7 @@ export async function answerCampusQuestion(message: string, history: ChatTurn[] 
     }
 
     const data = await res.json();
-    const text =
-      data.content?.filter((b: { type: string }) => b.type === "text").map((b: { text: string }) => b.text).join("\n") ??
-      "";
+    const text = data.choices?.[0]?.message?.content ?? "";
 
     return {
       answer: text || "I couldn't generate a response just now — please try again.",

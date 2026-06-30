@@ -10,12 +10,13 @@ import { Logomark, Wordmark } from "@/components/shared/logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -66,7 +67,28 @@ export default function LoginPage() {
                   Forgot password?
                 </Link>
               </div>
-              <Input id="password" name="password" type="password" required placeholder="••••••••" className="mt-1.5" />
+              <div className="relative mt-1.5">
+                <Input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  placeholder="••••••••"
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-warmgray-500 hover:text-warmgray-900 focus:outline-none"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
             </div>
 
             {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}

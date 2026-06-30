@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { ArrowLeft, Star, ShieldCheck, Loader2, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -27,7 +27,7 @@ interface TutorDetail {
     totalSessions: number;
     availability: string;
   };
-  user: { id: string; name: string; department: string | null; verificationStatus: string } | null;
+  user: { id: string; name: string; department: string | null; verificationStatus: string; avatarUrl: string | null } | null;
   recentRatings: { score: number; comment: string | null }[];
 }
 
@@ -44,6 +44,8 @@ export default function TutorDetailPage({ params }: { params: Promise<{ id: stri
   const [loading, setLoading] = useState(true);
   const [bookOpen, setBookOpen] = useState(false);
   const [booking, setBooking] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [courseCode, setCourseCode] = useState("");
   const [scheduledAt, setScheduledAt] = useState("");
   const [duration, setDuration] = useState(60);
@@ -81,6 +83,23 @@ export default function TutorDetailPage({ params }: { params: Promise<{ id: stri
     }
   }
 
+  async function handleDelete() {
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/tutors/${id}`, { method: "DELETE" });
+      if (!res.ok) {
+        toast.error("Could not delete profile");
+        setDeleting(false);
+        return;
+      }
+      toast.success("Tutor profile deleted");
+      router.push("/tutors");
+    } catch {
+      toast.error("Something went wrong");
+      setDeleting(false);
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex h-[60vh] items-center justify-center">
@@ -101,6 +120,7 @@ export default function TutorDetailPage({ params }: { params: Promise<{ id: stri
   const { tutor, user, recentRatings } = data;
   const expertise: string[] = JSON.parse(tutor.expertiseAreas || "[]");
   const availability: Record<string, string[]> = JSON.parse(tutor.availability || "{}");
+  const isOwner = session?.user?.id === user.id;
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
@@ -112,6 +132,7 @@ export default function TutorDetailPage({ params }: { params: Promise<{ id: stri
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-center gap-4">
             <Avatar className="h-16 w-16">
+              {user.avatarUrl && <AvatarImage src={user.avatarUrl} alt={user.name} className="object-cover" />}
               <AvatarFallback className="text-lg">{user.name.charAt(0)}</AvatarFallback>
             </Avatar>
             <div>
@@ -159,7 +180,16 @@ export default function TutorDetailPage({ params }: { params: Promise<{ id: stri
           </div>
         </div>
 
-        {session?.user?.id !== user.id && (
+        {isOwner ? (
+          <div className="mt-6 flex flex-col sm:flex-row gap-3">
+            <Button asChild className="flex-1">
+              <Link href={`/tutors/${tutor.id}/edit`}>Edit Profile</Link>
+            </Button>
+            <Button variant="danger" className="flex-1" onClick={() => setDeleteOpen(true)}>
+              Delete Profile
+            </Button>
+          </div>
+        ) : (
           <Button onClick={() => setBookOpen(true)} className="mt-6 w-full sm:w-auto">Book a session</Button>
         )}
       </div>
@@ -210,6 +240,24 @@ export default function TutorDetailPage({ params }: { params: Promise<{ id: stri
             <Button onClick={submitBooking} disabled={booking || !courseCode || !scheduledAt}>
               {booking && <Loader2 className="h-4 w-4 animate-spin" />}
               Request booking
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Tutor Profile</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete your tutor profile? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteOpen(false)}>Cancel</Button>
+            <Button variant="danger" onClick={handleDelete} disabled={deleting}>
+              {deleting && <Loader2 className="h-4 w-4 animate-spin" />}
+              Delete
             </Button>
           </DialogFooter>
         </DialogContent>
