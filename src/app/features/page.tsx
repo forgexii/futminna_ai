@@ -1,3 +1,12 @@
+/**
+ * @file features/page.tsx
+ * @description Detailed platform capability matrix highlighting the 6 core pillars of FUTMINNA AI.
+ * 
+ * MVP Specification Compliance:
+ * - Documents Marketplace, Tutoring, Campus Knowledge Assistant, Trust & Identity,
+ *   Moderation/Safety, and Transparent Pricing architecture.
+ */
+
 import { PublicNavbar } from "@/components/layout/public-navbar";
 import { PublicFooter } from "@/components/layout/public-footer";
 import { PinTab } from "@/components/shared/pin-tab";
@@ -22,7 +31,7 @@ const MODULES = [
     title: "Tutoring",
     pin: "violet" as const,
     points: [
-      "Search tutors by course code — MAT201, CSC301, PHY102 and more",
+      "Search tutors by course code: MAT201, CSC301, PHY102 and more",
       "See expertise areas, hourly rate, availability and verified ratings before booking",
       "Tutors set their own schedule and price; you book a slot that works for you",
       "Earnings dashboard for tutors, with session history and total payout",
@@ -46,7 +55,7 @@ const MODULES = [
     points: [
       "Ask about registration deadlines, academic calendar, or campus services",
       "Answers are grounded in a campus knowledge base, with sources cited",
-      "Get help navigating the platform itself — bookings, payments, trust scores",
+      "Get help navigating the platform itself: bookings, payments, trust scores",
       "Built to say \"I don't know\" rather than guess at sensitive academic dates",
     ],
   },
@@ -74,6 +83,9 @@ const MODULES = [
   },
 ];
 
+/**
+ * Platform feature breakdown for incoming students and university stakeholders.
+ */
 export default function FeaturesPage() {
   return (
     <div className="flex min-h-screen flex-col">
